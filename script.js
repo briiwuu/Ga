@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función para verificar si un curso está desbloqueado
     function isCourseUnlocked(courseId) {
         const course = cursosData.find(c => c.id === courseId);
-        if (!course) return false; // Curso no encontrado
+        if (!course) return false;
 
         if (course.prerrequisitos.length === 0) {
             return true; // No tiene prerrequisitos, está desbloqueado
@@ -128,6 +128,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Todos los prerrequisitos deben estar completados
         return course.prerrequisitos.every(prereqId => completedCourses.has(prereqId));
+    }
+
+    // NUEVA FUNCIÓN: Para desmarcar cursos que dependen del que se acaba de desmarcar
+    function checkAndUncompleteDependencies(uncompletedCourseId) {
+        // Itera sobre todos los cursos para ver cuáles lo tenían como prerrequisito
+        cursosData.forEach(course => {
+            // Si el curso actual tiene 'uncompletedCourseId' como prerrequisito
+            // Y el curso actual *estaba* marcado como completado
+            if (course.prerrequisitos.includes(uncompletedCourseId) && completedCourses.has(course.id)) {
+                // Entonces, desmárcalo
+                completedCourses.delete(course.id);
+                // Y de forma recursiva, verifica si desmarcar este curso afecta a otros
+                checkAndUncompleteDependencies(course.id);
+            }
+        });
     }
 
     // Renderiza la malla
@@ -145,11 +160,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 cursoDiv.classList.add('curso-item');
                 cursoDiv.dataset.id = curso.id; // Guarda el ID del curso en el HTML
 
+                // Añade clases CSS para el estado (completado, bloqueado, etc.)
                 if (completedCourses.has(curso.id)) {
                     cursoDiv.classList.add('completed');
                 } else if (!isCourseUnlocked(curso.id)) {
                     cursoDiv.classList.add('locked');
-                    cursoDiv.title = 'Requiere completar los prerrequisitos'; // Tooltip
+                    cursoDiv.title = 'Requiere completar los prerrequisitos'; // Tooltip para cursos bloqueados
                 }
 
                 cursoDiv.classList.add(curso.tipo.toLowerCase()); // Para estilos específicos de Obligatorio/Electivo
@@ -159,31 +175,38 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="tag">${curso.tipo.substring(0, 5)}.</span>
                 `;
 
-                // Añadir el listener para marcar/desmarcar solo si no está completado
-                if (!completedCourses.has(curso.id)) {
-                    cursoDiv.addEventListener('click', () => {
-                        // Solo permite marcar si está desbloqueado
+                // Añadir el listener para marcar/desmarcar
+                cursoDiv.addEventListener('click', () => {
+                    if (completedCourses.has(curso.id)) {
+                        // Si el curso ya está completado, lo desmarca
+                        completedCourses.delete(curso.id);
+                        // Llama a la función para desmarcar dependencias
+                        checkAndUncompleteDependencies(curso.id);
+                        alert(`"${curso.nombre}" desmarcado.`);
+                    } else {
+                        // Si el curso NO está completado, intenta marcarlo
                         if (isCourseUnlocked(curso.id)) {
                             completedCourses.add(curso.id);
-                            // Opcional: Guardar el estado en el almacenamiento local
-                            localStorage.setItem('completedCourses', JSON.stringify(Array.from(completedCourses)));
-                            renderMalla(); // Volver a renderizar para actualizar el estado
+                            alert(`"${curso.nombre}" completado.`);
                         } else {
                             alert('Primero debes completar los prerrequisitos de este curso.');
                         }
-                    });
-                }
+                    }
+                    // Siempre guarda el estado en el almacenamiento local y vuelve a renderizar para actualizar
+                    localStorage.setItem('completedCourses', JSON.stringify(Array.from(completedCourses)));
+                    renderMalla();
+                });
                 cicloDiv.appendChild(cursoDiv);
             });
             mallaContainer.appendChild(cicloDiv);
         });
     }
 
-    // Cargar cursos completados desde el almacenamiento local al inicio
+    // Cargar cursos completados desde el almacenamiento local al inicio de la página
     const savedCompleted = localStorage.getItem('completedCourses');
     if (savedCompleted) {
         completedCourses = new Set(JSON.parse(savedCompleted));
     }
 
-    renderMalla(); // Renderiza la malla por primera vez
+    renderMalla(); // Renderiza la malla por primera vez al cargar la página
 });
