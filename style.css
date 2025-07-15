@@ -1,1 +1,116 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 15px;
+    background-color: #f8f8f8; /* Fondo muy claro */
+    color: #333;
+    text-align: center;
+    line-height: 1.6;
+}
 
+h1 {
+    color: #4a4a4a;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+}
+
+#malla-container {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los ciclos salten de línea si no caben */
+    justify-content: center;
+    gap: 20px; /* Espacio entre los ciclos */
+    max-width: 1400px; /* Ancho máximo para centrar */
+    margin: 0 auto;
+}
+
+.ciclo {
+    flex: 1; /* Permite que los ciclos crezcan y se encojan */
+    min-width: 250px; /* Ancho mínimo para cada ciclo */
+    max-width: 300px; /* Ancho máximo para cada ciclo */
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0; /* Borde sutil */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Sombra muy suave */
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.ciclo h2 {
+    color: #555;
+    font-size: 1.3em;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee; /* Línea divisoria en el título del ciclo */
+    padding-bottom: 8px;
+}
+
+.curso-item {
+    background-color: #f0f0f0; /* Fondo más claro para los cursos */
+    border: 1px solid #dcdcdc; /* Borde un poco más oscuro */
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+    cursor: pointer; /* Indica que es clickeable */
+    font-size: 0.95em;
+    position: relative; /* Para la "x" de completado */
+}
+
+.curso-item:last-child {
+    margin-bottom: 0;
+}
+
+.curso-item:not(.completed):hover {
+    background-color: #e6e6e6; /* Efecto al pasar el ratón */
+    border-color: #c0c0c0;
+    transform: translateY(-2px);
+}
+
+.curso-item.locked {
+    opacity: 0.6; /* Los cursos bloqueados son más tenues */
+    cursor: not-allowed;
+    background-color: #f7f7f7;
+    border-color: #e5e5e5;
+}
+
+.curso-item.completed {
+    background-color: #eafaea; /* Verde muy claro para completado */
+    border-color: #c4ecc4; /* Borde verde suave */
+    text-decoration: line-through; /* Tachado */
+    color: #777;
+    pointer-events: none; /* No se puede hacer clic de nuevo */
+}
+
+.curso-item .tag {
+    font-size: 0.75em;
+    padding: 3px 6px;
+    border-radius: 4px;
+    margin-left: auto; /* Mueve el tag a la derecha */
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.obligatorio .tag {
+    background-color: #e0f2f7; /* Azul claro */
+    color: #2196f3;
+}
+
+.electivo .tag {
+    background-color: #fff3e0; /* Naranja claro */
+    color: #ff9800;
+}
+
+/* Indicador de "Completado" */
+.curso-item.completed::after {
+    content: '✔';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #4CAF50; /* Verde de verificación */
+    font-size: 1.2em;
+    font-weight: bold;
+}
